@@ -1,0 +1,19 @@
+- name: Install microk8s
+  community.general.snap:
+    name:
+      - microk8s
+    classic: true
+    channel: 1.27/stable
+  become: true
+  become_method: sudo
+- name: Read the File
+  ansible.builtin.slurp:
+    src: /boot/firmware/cmdline.txt
+  register: cmdline
+- name: Conditionally Update File Contents
+  ansible.builtin.template:
+    src: templates/cmdline_txt.j2
+    dest: /boot/firmware/cmdline.txt
+  when: "'cgroup' not in cmdline['content']|b64decode"
+  become: true
+  become_method: sudo
